@@ -1,0 +1,25 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+
+# Go build artifacts
+*.log
+*.test
+*.prof
+
+# IDE/editor config files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependency directories
+vendor/
+bin/
+pkg/
+
+#env
+*.env
