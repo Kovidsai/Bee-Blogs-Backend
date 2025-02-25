@@ -28,7 +28,7 @@ go run main.go
 - The API is tested using POSTMAN.
 - API endpoints follow RESTful conventions.
 
-## 📖 To-Do**  
+## **📖 To-Do**  
 - 🔹 Add Commenting system
 - 🔹 Add more API endpoints
 - 🔹 Improve database queries
