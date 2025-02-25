@@ -21,7 +21,13 @@ This project is **in progress**.
 ```sh
 git clone https://github.com/your-username/BeeBlogs.git
 cd BeeBlogs
+```
+### **2️⃣ Install dependencies**  
+```sh
 go mod tidy
+```
+### **3️⃣ Run the project**  
+```sh
 go run main.go
 ```
 ## **📬 API Testing**  
