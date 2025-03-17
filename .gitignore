@@ -23,3 +23,6 @@ pkg/
 
 #env
 *.env
+
+Zone.Identifier
+*.Zone.Identifier
