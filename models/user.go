@@ -1,6 +1,11 @@
 package models
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type User struct {
 	Id       int    `json:"-" orm:"auto"`
@@ -24,4 +29,12 @@ func (u *User) HashPassword() error {
 func (u *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
+}
+
+func ViewUser(c *gin.Context){
+	c.JSON(http.StatusTemporaryRedirect, gin.H{"message": "This feature is currently Under Development :)"})
+}
+
+func UpdateUser(c *gin.Context){
+	c.JSON(http.StatusTemporaryRedirect, gin.H{"message": "This feature is currently Under Development :)"})
 }

@@ -15,6 +15,7 @@ This project is **in progress**.
 - ✅ Create, read, update, and delete (CRUD) blog posts  
 - ✅ Authentication middleware  
 - ✅ RESTful API design  
+- ✅ Added Comment and Like features
 
 ## **🛠 Setup & Installation**  
 ### **1️⃣ Clone the repo**  
@@ -35,7 +36,6 @@ go run main.go
 - API endpoints follow RESTful conventions.
 
 ## **📖 To-Do**  
-- 🔹 Add Commenting system
 - 🔹 Add more API endpoints
 - 🔹 Improve database queries
 

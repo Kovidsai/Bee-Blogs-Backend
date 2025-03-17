@@ -12,11 +12,13 @@ import (
 )
 
 type Post struct {
-	ID        int       `json:"-" orm:"auto;pk"`
-	Title     string    `json:"title" orm:"size(200)"`
-	Content   string    `json:"content" orm:"type(text)"`
-	Author    *User     `json:"-" orm:"rel(fk)"` // Foreign key to User
-	CreatedAt time.Time `json:"-" orm:"auto_now_add;type(datetime)"`
+	ID            int       `json:"-" orm:"auto;pk"`
+	Title         string    `json:"title" orm:"size(200)"`
+	Content       string    `json:"content" orm:"type(text)"`
+	LikesCount    int       `json:"likes_count" orm:"default(0)"`
+	CommentsCount int       `json:"comments_count" orm:"default(0)"`
+	Author        *User     `json:"-" orm:"rel(fk)"` // Foreign key to User
+	CreatedAt     time.Time `json:"-" orm:"auto_now_add;type(datetime)"`
 }
 
 func UploadBlog(c *gin.Context) {
@@ -71,7 +73,7 @@ func UpdateBlog(c *gin.Context) {
 // }
 
 func DeleteBlog(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("Id")) // Get Id from URL
+	postId, err := strconv.Atoi(c.Param("postId")) // Get Id from URL
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Id"})
 		c.Abort()
@@ -80,10 +82,88 @@ func DeleteBlog(c *gin.Context) {
 
 	// _, err := GetPostById(id)
 	o := orm.NewOrm()
-	if numRows, err := o.QueryTable("post").Filter("id", id).Delete(); err != nil || numRows == 0 {
+	if numRows, err := o.QueryTable("post").Filter("id", postId).Delete(); err != nil || numRows == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Post not found"})
 		c.Abort()
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Deleted the Post"})
+}
+
+func LoadBlogWithId(c *gin.Context) {
+	userID, _ := c.Get("userID")
+
+	postId, err := strconv.Atoi(c.Param("postId")) // Get post Id from URL
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Id"})
+		c.Abort()
+		return
+	}
+
+	o := orm.NewOrm()
+	post := Post{ID: postId}
+
+	// Try to fetch the blog post
+	err = o.Read(&post)
+	if err == orm.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Blog post not found"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+	// Check for liked status
+	liked := false
+	if userID != nil {
+		count, err := o.QueryTable("like").Filter("user_id", userID.(int)).Filter("post_id", postId).Count()
+		if err != nil {
+			c.JSON(http.StatusNoContent, gin.H{"error": "DataBase Error"})
+			return
+		}
+		liked = count > 0
+	}
+
+	// Return the blog post as JSON
+	c.JSON(http.StatusOK, gin.H{
+		"data":  post,
+		"liked": liked,
+	})
+}
+
+func LoadBlogs(c *gin.Context) {
+	o := orm.NewOrm()
+	var posts []Post
+	// getting info from frondend about how much content to load and from where
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+
+	// fetch from the posts dataset
+	count, err := o.QueryTable("post").Count()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count"})
+	}
+	_, err = o.QueryTable("post").RelatedSel().Limit(limit).Offset(offset).All(&posts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to Fetch the data"})
+	}
+
+	hasMore := (offset + limit) < int(count)
+
+	var response []map[string]any
+	for _, post := range posts {
+		response = append(response, map[string]any{
+			"id":             post.ID,
+			"title":          post.Title,
+			"content":        post.Content,
+			"likes_count":    post.LikesCount,
+			"comments_count": post.CommentsCount,
+			"author":         post.Author.Name,
+			"created_at":     post.CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":    response,
+		"hasMore": hasMore,
+	})
 }

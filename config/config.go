@@ -31,7 +31,7 @@ func ConnectDB() {
 		log.Fatal("DataBase Connection Failed", err)
 	}
 
-	orm.RegisterModel(new(models.User), new(models.Post), new(models.Comment))
+	orm.RegisterModel(new(models.User), new(models.Post), new(models.Comment), new(models.Like))
 	orm.RunSyncdb("default", false, true)
 	fmt.Printf("DataBase Connection Succeded")
 }
